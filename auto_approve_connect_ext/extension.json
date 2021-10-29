@@ -1,7 +1,7 @@
 {
   "name": "Auto approval extension",
   "description": "Extension that automatically approves incoming fulfillment requests",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "readme_url": "https://github.com/VTimofeenko/connect-autoapprove/blob/master/README.md",
   "changelog_url": "https://github.com/VTimofeenko/connect-autoapprove/blob/master/CHANGELOG.md",
   "capabilities": {
