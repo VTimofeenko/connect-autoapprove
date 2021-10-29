@@ -2,8 +2,8 @@
   "name": "Auto approval extension",
   "description": "Extension that automatically approves incoming fulfillment requests",
   "version": "0.1.0",
-  "readme_url": "https://example.com/README.md",
-  "changelog_url": "https://example.com/CHANGELOG.md",
+  "readme_url": "https://github.com/VTimofeenko/connect-autoapprove/blob/master/README.md",
+  "changelog_url": "https://github.com/VTimofeenko/connect-autoapprove/blob/master/CHANGELOG.md",
   "capabilities": {
     "asset_purchase_request_processing": [
       "pending"
