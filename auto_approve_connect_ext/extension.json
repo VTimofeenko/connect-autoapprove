@@ -8,7 +8,6 @@
     "asset_purchase_request_processing": [
       "pending"
     ],
-    "product_custom_event_processing": [],
-    "product_action_execution": []
+    "product_custom_event_processing": []
   }
 }

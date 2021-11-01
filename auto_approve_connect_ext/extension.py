@@ -3,7 +3,7 @@
 # Copyright (c) 2021, Vladimir Timofeenko <vladimir@vtimofeenko.com>
 # All rights reserved.
 #
-from connect.eaas.extension import Extension, ProcessingResponse, CustomEventResponse, ProductActionResponse
+from connect.eaas.extension import Extension, ProcessingResponse, CustomEventResponse
 from uuid import uuid4
 from toolz import compose, pluck
 
@@ -43,7 +43,3 @@ class AutoApprovalExtensionExtension(Extension):
     async def process_product_custom_event(self, request):
         self.logger.info("Testing...")
         return CustomEventResponse.done()
-
-    async def execute_product_action(self, request):
-        self.logger.info(f"Product action: {request}")
-        return ProductActionResponse.done(http_status=302, headers={"Location": "https://google.com"})
