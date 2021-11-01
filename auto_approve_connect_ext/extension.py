@@ -39,7 +39,3 @@ class AutoApprovalExtensionExtension(Extension):
         await self.client.requests[request_id]("approve").post({"template_id": "TL-843-435-779"})
 
         return ProcessingResponse.done()
-
-    async def process_product_custom_event(self, request):
-        self.logger.info("Testing...")
-        return CustomEventResponse.done()
