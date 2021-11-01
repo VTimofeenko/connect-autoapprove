@@ -6,8 +6,6 @@
 from connect.eaas.extension import Extension, ProcessingResponse, CustomEventResponse
 from uuid import uuid4
 
-from threading import Thread
-
 
 class AutoApprovalExtensionExtension(Extension):
     async def _set_license_on_request(self, request_id: str):
