@@ -5,6 +5,11 @@ Extension that automatically approves incoming fulfillment requests.
 
 Upon receiving a fulfillment request, it will generate a uuid4 and store it as the fulfillment parameter `volume_license` and then approve the request.
 
+# Overview
+
+Diagram of what the extension does:
+
+![](assets/connect-autoapprove.png)
 
 
 ## License
