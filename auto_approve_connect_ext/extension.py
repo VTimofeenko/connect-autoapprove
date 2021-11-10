@@ -4,6 +4,8 @@
 # All rights reserved.
 #
 from uuid import uuid4
+from typing import List
+from operator import itemgetter
 
 from connect.eaas.extension import Extension, ProcessingResponse, CustomEventResponse
 
@@ -43,7 +45,16 @@ class AutoApprovalExtensionExtension(Extension):
         request_id = request["id"]
         product_id = request["asset"]["product"]["id"]
 
-        await self._set_license_on_request(request_id)
+        params: List = request["asset"]["params"]
+
+        # TODO: temporary workaround to make the extension more generic.
+        # Checks if 'volume_license', the ID of the parameter, is present in the request
+        # If so - sets it
+        # Else - ignore
+        # TODO: think about using toolz and pluck? Depends on Connect runtime's ability to
+        # contain extra deps
+        if "volume_license" in map(itemgetter("id"), params):
+            await self._set_license_on_request(request_id)
 
         template_id = await self._get_single_product_fulfillment_template(product_id)
 
