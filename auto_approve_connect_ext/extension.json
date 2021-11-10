@@ -7,6 +7,9 @@
   "capabilities": {
     "asset_purchase_request_processing": [
       "pending"
+    ],
+    "asset_cancel_request_processing": [
+      "pending"
     ]
   }
 }
