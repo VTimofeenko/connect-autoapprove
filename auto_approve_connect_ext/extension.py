@@ -63,3 +63,16 @@ class AutoApprovalExtensionExtension(Extension):
         await self.client.requests[request_id]("approve").post({"template_id": template_id})
 
         return ProcessingResponse.done()
+
+    async def process_asset_change_request(self, request):
+        """Cancels the request."""
+        self.logger.info(f"Obtained change request with id {request['id']}")
+        request_id = request["id"]
+        product_id = request["asset"]["product"]["id"]
+
+        # Connect needs a template for canceling as well
+        template_id = await self._get_single_product_fulfillment_template(product_id)
+
+        await self.client.requests[request_id]("approve").post({"template_id": template_id})
+
+        return ProcessingResponse.done()

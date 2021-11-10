@@ -10,6 +10,9 @@
     ],
     "asset_cancel_request_processing": [
       "pending"
+    ],
+    "asset_change_request_processing": [
+      "pending"
     ]
   }
 }
