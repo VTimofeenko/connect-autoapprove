@@ -42,7 +42,6 @@ class AutoApprovalExtensionExtension(Extension):
         # generate a random uuid to server as the license
         request_id = request["id"]
         product_id = request["asset"]["product"]["id"]
-        self.logger.info(f"My product id is {product_id}")
 
         await self._set_license_on_request(request_id)
 
