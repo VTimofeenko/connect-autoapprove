@@ -7,7 +7,7 @@ from uuid import uuid4
 from typing import List
 from operator import itemgetter
 
-from connect.eaas.extension import Extension, ProcessingResponse, CustomEventResponse
+from connect.eaas.extension import Extension, ProcessingResponse
 
 
 class AutoApprovalExtensionExtension(Extension):
