@@ -23,12 +23,14 @@ class AutoApprovalExtensionExtension(Extension):
         template"""
 
         async def get_product_fulfillment_templates():
-            # see connect-python-openapi-client/issues/27
-            templates = []
-            async for template in self.client.products[product_id].templates.all():
-                if template.get("type") == "fulfillment":
-                    templates.append(template["id"])
-            return templates
+            return list(
+                [
+                    _["id"]
+                    async for _ in self.client.products[product_id]
+                    .templates.filter(type="fulfillment")
+                    .values_list("id")
+                ]
+            )
 
         templates = await get_product_fulfillment_templates()
 

@@ -3,7 +3,7 @@ version: '3'
 services:
   auto_approval_extension_dev:
     container_name: auto_approval_extension_dev
-    image: cloudblueconnect/connect-extension-runner:23.8
+    image: cloudblueconnect/connect-extension-runner:24.4
     command: cextrun -d
     volumes:
       - .:/extension
@@ -12,7 +12,7 @@ services:
 
   auto_approval_extension_bash:
     container_name: auto_approval_extension_bash
-    image: cloudblueconnect/connect-extension-runner:23.8
+    image: cloudblueconnect/connect-extension-runner:24.5
     working_dir: /extension
     command: /bin/bash
     stdin_open: true
@@ -24,7 +24,7 @@ services:
 
   auto_approval_extension_test:
     container_name: auto_approval_extension_test
-    image: cloudblueconnect/connect-extension-runner:23.8
+    image: cloudblueconnect/connect-extension-runner:24.5
     working_dir: /extension
     command: /bin/bash -c "poetry install && pytest --verbose --cov=auto_approve_connect_ext --cov-report=html --cov-report=term-missing:skip-covered"
     volumes:
