@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "auto-approval-extension"
-version = "0.1.1"
+version = "0.1.3"
 description = "Extension that automatically approves incoming fulfillment requests"
 authors = ["Vladimir Timofeenko <vladimir@vtimofeenko.com>"]
 license = "Apache Software License 2.0"
