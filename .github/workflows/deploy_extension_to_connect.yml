@@ -1,5 +1,5 @@
 ---
-name: GitHub Actions Demo
+name: Deploy Connect environment on tag
 on:  # yamllint disable-line rule:truthy
   push:
     tags:
