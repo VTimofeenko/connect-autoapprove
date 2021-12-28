@@ -6,8 +6,8 @@ on:  # yamllint disable-line rule:truthy
       - 'v*.*.*'
 env:
   API_URL: "https://portal.connect.cloudblue.com/public/v1"
-  SERVICE_PK: "SRVC-3690-8891"
-  ENVIRONMENT_ID: "ENV-3690-8891-01"
+  SERVICE_PK: "SRVC-6043-6374"
+  ENVIRONMENT_ID: "ENV-6043-6374-01"
 jobs:
   push-tag-to-Connect:
     runs-on: ubuntu-latest
