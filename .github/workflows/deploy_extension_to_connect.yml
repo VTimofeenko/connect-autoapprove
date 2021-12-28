@@ -1,0 +1,58 @@
+---
+name: GitHub Actions Demo
+on:  # yamllint disable-line rule:truthy
+  push:
+    tags:
+      - 'v*.*.*'
+jobs:
+  push-tag-to-Connect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set the needed variables for shorthands
+        # yamllint disable-line rule:line-length
+        run: echo 'ENV_URL="${{ env.API_URL }}/devops/services/${{ env.SERVICE_PK }}/environments/${{ env.ENVIRONMENT_ID }}"' >> $GITHUB_ENV
+
+      - name: Record the Connect environment status
+        id: set_env_state
+        run: |
+          STATE=$(curl \
+               --fail \
+               -H 'Authorization: ${{ secrets.API_KEY }}' \
+               -X GET \
+               "${{ env.ENV_URL }}" | jq '.status')
+          echo "::set-output name=state::$STATE"
+
+      - name: Stop the Connect environment if it is running
+        if: ${{ steps.set_env_state.outputs.state == 'running' }}
+        run: |
+          curl \
+               --fail \
+               -H 'Authorization: ${{ secrets.API_KEY }}' \
+               -H 'Content-type: application/json' \
+               -X POST \
+               "${{ env.ENV_URL }}/stop"
+          # naive approach to wait until the environment is stopped.
+          # Perhaps better done by polling loop. Not sure if /stop
+          # is synchronous rn.
+          sleep 5
+
+      - name: Set tag on the Connect environment
+        run: |
+          PUT_BODY='{"runtime":"cloud","git":{"auth":{},"url":"https://github.com/'${GITHUB_REPOSITORY}'","tag":"'${GITHUB_REF:10}'"}}'
+          curl \
+               --fail \
+               -H 'Authorization: ${{ secrets.API_KEY }}' \
+               -H 'Content-type: application/json' \
+               -X PUT \
+               --data-raw ${PUT_BODY} \
+               ${{ env.ENV_URL }}
+
+      - name: Start the enviornment again if it was running
+        if: ${{ steps.set_env_state.outputs.state == 'running' }}
+        run: |
+          curl \
+               --fail \
+               -H 'Authorization: ${{ secrets.API_KEY }}' \
+               -H 'Content-type: application/json' \
+               -X POST \
+               "${{ env.ENV_URL }}/start"
