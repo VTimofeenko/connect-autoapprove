@@ -38,7 +38,7 @@ jobs:
           # naive approach to wait until the environment is stopped.
           # Perhaps better done by polling loop. Not sure if /stop
           # is synchronous rn.
-          sleep 5
+          sleep 20
 
       - name: Set tag on the Connect environment
         run: |
