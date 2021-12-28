@@ -27,7 +27,7 @@ jobs:
           echo "::set-output name=state::$STATE"
 
       - name: Stop the Connect environment if it is running
-        if: ${{ steps.set_env_state.outputs.state == 'running' }}
+        if: ${{ steps.set_env_state.outputs.state }} == 'running'
         run: |
           curl \
                --fail \
@@ -52,7 +52,7 @@ jobs:
                ${{ env.ENV_URL }}
 
       - name: Start the enviornment again if it was running
-        if: ${{ steps.set_env_state.outputs.state == 'running' }}
+        if: ${{ steps.set_env_state.outputs.state }} == 'running'
         run: |
           curl \
                --fail \
