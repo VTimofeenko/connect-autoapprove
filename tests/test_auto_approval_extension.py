@@ -15,12 +15,12 @@ async def test_process_asset_purchase_request(
     logger,
 ):
     config = {}
-    request = {'id': 1}
+    request = {"id": 1}
     responses = [
         response_factory(count=100),
-        response_factory(value=[{'id': 'item-1', 'value': 'value1'}]),
+        response_factory(value=[{"id": "item-1", "value": "value1"}]),
     ]
     client = await async_client_factory(responses)
     ext = AutoApprovalExtensionExtension(client, logger, config)
     result = await ext.process_asset_purchase_request(request)
-    assert result.status == 'success'
+    assert result.status == "success"

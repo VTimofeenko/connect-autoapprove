@@ -13,29 +13,34 @@ from connect.client import AsyncConnectClient
 
 
 ConnectResponse = namedtuple(
-    'ConnectResponse',
+    "ConnectResponse",
     (
-        'count', 'query', 'ordering', 'select',
-        'value', 'status', 'exception',
+        "count",
+        "query",
+        "ordering",
+        "select",
+        "value",
+        "status",
+        "exception",
     ),
 )
 
 
 def _parse_qs(url):
-    if '?' not in url:
+    if "?" not in url:
         return None, None, None
 
-    url, qs = url.split('?')
+    url, qs = url.split("?")
     parsed = parse_qs(qs, keep_blank_values=True)
     ordering = None
     select = None
     query = None
 
     for k in parsed.keys():
-        if k.startswith('ordering('):
-            ordering = k[9:-1].split(',')
-        elif k.startswith('select('):
-            select = k[7:-1].split(',')
+        if k.startswith("ordering("):
+            ordering = k[9:-1].split(",")
+        elif k.startswith("select("):
+            select = k[7:-1].split(",")
         else:
             value = parsed[k]
             if not value[0]:
@@ -49,19 +54,19 @@ def _mock_kwargs_generator(response_iterator, url):
 
     query, ordering, select = _parse_qs(url)
     if res.query:
-        assert query == res.query, 'RQL query does not match.'
+        assert query == res.query, "RQL query does not match."
     if res.ordering:
-        assert ordering == res.ordering, 'RQL ordering does not match.'
+        assert ordering == res.ordering, "RQL ordering does not match."
     if res.select:
-        assert select == res.select, 'RQL select does not match.'
+        assert select == res.select, "RQL select does not match."
     mock_kwargs = {
-        'match_querystring': False,
+        "match_querystring": False,
     }
     if res.count is not None:
         end = 0 if res.count == 0 else res.count - 1
-        mock_kwargs['status'] = 200
-        mock_kwargs['headers'] = {'Content-Range': f'items 0-{end}/{res.count}'}
-        mock_kwargs['json'] = []
+        mock_kwargs["status"] = 200
+        mock_kwargs["headers"] = {"Content-Range": f"items 0-{end}/{res.count}"}
+        mock_kwargs["json"] = []
 
     mock_kwargs.update(_value_arg_validation(res))
     return mock_kwargs
@@ -72,22 +77,22 @@ def _value_arg_validation(res):
     if isinstance(res.value, Iterable):
         count = len(res.value)
         end = 0 if count == 0 else count - 1
-        result['status'] = 200
-        result['json'] = res.value
-        result['headers'] = {
-            'Content-Range': f'items 0-{end}/{count}',
+        result["status"] = 200
+        result["json"] = res.value
+        result["headers"] = {
+            "Content-Range": f"items 0-{end}/{count}",
         }
     elif isinstance(res.value, dict):
-        result['status'] = res.status or 200
-        result['json'] = res.value
+        result["status"] = res.status or 200
+        result["json"] = res.value
     elif res.value is None:
         if res.exception:
-            result['body'] = res.exception
+            result["body"] = res.exception
         else:
-            result['status'] = res.status
+            result["status"] = res.status
     else:
-        result['status'] = res.status or 200
-        result['body'] = str(res.value)
+        result["status"] = res.status or 200
+        result["body"] = str(res.value)
     return result
 
 
@@ -122,6 +127,7 @@ def response_factory():
             status=status,
             exception=exception,
         )
+
     return _create_response
 
 
@@ -144,8 +150,8 @@ async def async_client_factory(httpx_mock):
             if self.response.status_code >= 400:
                 self.response.raise_for_status()
 
-        client = AsyncConnectClient('Key', use_specs=False)
+        client = AsyncConnectClient("Key", use_specs=False)
         client._execute_http_call = MethodType(_execute_http_call, client)
         return client
-    return _create_async_client
 
+    return _create_async_client
