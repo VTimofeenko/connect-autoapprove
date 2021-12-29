@@ -3,3 +3,7 @@ htmlcov
 .coverage
 coverage.xml
 dist/
+
+.auto_approval_extension_dev.env
+.env
+.secrets
