@@ -3,19 +3,117 @@
 # Copyright (c) 2021, Vladimir Timofeenko <vladimir@vtimofeenko.com>
 # All rights reserved.
 #
-from uuid import uuid4
-from typing import List
+from random import choice
+from typing import List, Callable
 from operator import itemgetter
+from faker import Faker
 
 from connect.eaas.extension import Extension, ProcessingResponse
 
 
 class AutoApprovalExtensionExtension(Extension):
-    async def _set_license_on_request(self, request_id: str):
-        license_key = uuid4()
-        self.logger.info(f"Generated license key {license_key} for request {request_id}")
+    def _generate_fake_address(self) -> dict:
+        """
+        Generates a fake address in a format conforming with Connect schema
+
+        Implementation note: not a staticmethod since there is a call to self.faker
+        """
+        fake = self.faker
+        return {
+            "address_line1": fake.street_address(),
+            "address_line2": "",
+            "city": fake.city(),
+            "country": fake.country_code(),
+            "postal_code": fake.postalcode(),
+            "state": fake.state(),
+        }
+
+    def _generate_fake_phone(self) -> dict:
+        """
+        Generates a fake phone number in a format conforming with Connect schema.
+
+        Implementation note: not a staticmethod since there is a call to self.faker
+        """
+        fake = self.faker
+        return {
+            "country_code": "+1",
+            "area_code": "949",
+            "phone_number": str(fake.random_int(5010000, 5019999)),
+        }
+
+    @staticmethod
+    def _pick_random_choice(param: dict) -> Callable:
+        """
+        When called with the parameter that has constraints for choices, will return the function to return a single
+        value from a random element in the choices.
+        """
+        if param["type"] not in {"choice", "dropdown", "subdomain"}:
+            raise ValueError(f"Parameter {param['name']} not in allowed types, may be a bug")
+
+        def _f():
+            return choice(param["value_choices"])["value"]
+
+        return _f
+
+    @staticmethod
+    def _check_random_checkboxes(param: dict) -> Callable:
+        """When used with a checkbox parameter, returns list of values with randomly assigned True or False"""
+        if param["type"] != "checkbox":
+            raise ValueError(f"Parameter {param['name']} not in allowed types, may be a bug")
+
+        def _f():
+            return {_choice["value"]: choice((True, False)) for _choice in param["value_choices"]}
+
+        return _f
+
+    def _generate_random_subdomain(self, param: dict) -> Callable:
+        """Generates a random subdomain by generating a random word and then picking a random domain from the choices"""
+        if param["type"] != "subdomain":
+            raise ValueError(f"Parameter {param['name']} not in allowed types, may be a bug")
+
+        def _f():
+            return self.faker.word() + "." + self._pick_random_choice(param)()
+
+        return _f
+
+    def __init__(self, *args, **kwargs):
+        self.faker = Faker()
+        # contains the mapping between parameter type, field ("value" or "structured_value" and
+        # a callable that returns the actual value
+        self.param_fake_map = {
+            "text": ("value", self.faker.uuid4),
+            "address": ("structured_value", self._generate_fake_address),
+            "checkbox": ("structured_value", self._check_random_checkboxes),
+            "choice": ("value", self._pick_random_choice),
+            "domain": ("value", self.faker.safe_domain_name),
+            "dropdown": ("value", self._pick_random_choice),
+            "email": ("value", self.faker.safe_email),
+            "object": ("value", lambda: "{}"),  # not sure how to randomize JSON
+            "password": ("value", self.faker.uuid4),
+            "phone": ("structured_value", self._generate_fake_phone),
+            "subdomain": ("value", self._generate_random_subdomain),
+            "url": ("value", self.faker.url),
+        }
+        super().__init__(*args, **kwargs)
+
+    async def _fill_parameter(self, request_id: str, param: dict):
+        """
+        Special note on 'checkbox', 'choice', "dropdown", "subdomain":
+
+        these parameters have constraints, so the function to pick a random choice has to be 'seeded' with the
+        constraints taken from the parameter. This is implemented through partial application
+        """
+        parameter_id = param["id"]
+        self.logger.info(f"Filling in parameter {parameter_id}")
+        parameter_type = param["type"]
+
+        value_type, random_function = self.param_fake_map[parameter_type]
+
+        if parameter_type in {"checkbox", "choice", "dropdown", "subdomain"}:
+            random_function = random_function(param)
+
         await self.client.requests[request_id].update(
-            payload={"asset": {"params": [{"id": "volume_license", "value": str(license_key)}]}}
+            payload={"asset": {"params": [{"id": parameter_id, value_type: random_function()}]}}
         )
 
     async def _get_single_product_fulfillment_template(self, product_id: str) -> str:
@@ -47,16 +145,11 @@ class AutoApprovalExtensionExtension(Extension):
         request_id = request["id"]
         product_id = request["asset"]["product"]["id"]
 
-        params: List = request["asset"]["params"]
+        # Get the list of only the fulfillment params from incoming fulfillment request
+        fulfillment_params: List = list(filter(lambda _: _["phase"] == "fulfillment", request["asset"]["params"]))
 
-        # TODO: temporary workaround to make the extension more generic.
-        # Checks if 'volume_license', the ID of the parameter, is present in the request
-        # If so - sets it
-        # Else - ignore
-        # TODO: think about using toolz and pluck? Depends on Connect runtime's ability to
-        # contain extra deps
-        if "volume_license" in map(itemgetter("id"), params):
-            await self._set_license_on_request(request_id)
+        for param in fulfillment_params:
+            await self._fill_parameter(request_id, param)
 
         template_id = await self._get_single_product_fulfillment_template(product_id)
 
